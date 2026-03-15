@@ -11,11 +11,9 @@ LOOKBACK = 252
 
 def strategy(prices, current_date):
     """
-    Experiment 12: Top 2 without vol filter.
+    Experiment 13: Top 2 no vol filter, 90/10 momentum/MR.
 
-    Exp8 has a vol filter at 85th percentile that excludes ~3 assets.
-    With only 2 positions, inv-vol weighting already handles risk.
-    Removing the filter gives the signal more candidates to pick from.
+    Exp12 (80/20) = 1.692. Try higher momentum weight.
     """
     if len(prices) < 252:
         return {}
@@ -34,14 +32,13 @@ def strategy(prices, current_date):
             return s * 0
         return (s - s.mean()) / s.std()
 
-    combined = 0.8 * zscore(mom_12m) + 0.2 * zscore(mr_signal)
+    combined = 0.9 * zscore(mom_12m) + 0.1 * zscore(mr_signal)
     eligible = combined.dropna()
 
     if len(eligible) == 0:
         return {}
 
-    top_n = min(2, len(eligible))
-    top_assets = eligible.nlargest(top_n).index.tolist()
+    top_assets = eligible.nlargest(2).index.tolist()
 
     vol_20d = returns.iloc[-20:].std() * np.sqrt(252)
     inv_vol = 1.0 / vol_20d[top_assets].replace(0, np.nan).dropna()
