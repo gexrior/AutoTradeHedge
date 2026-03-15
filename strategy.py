@@ -11,10 +11,11 @@ LOOKBACK = 252
 
 def strategy(prices, current_date):
     """
-    Experiment 7: Even more concentrated — top 3 assets.
+    Experiment 8: Extreme concentration — top 2 assets.
 
-    Exp6 showed that concentration (top 4) + higher momentum weight (80/20)
-    + higher investment (95%) = big win. Push further: top 3.
+    Exp6: top 4 → sharpe 1.10
+    Exp7: top 3 → sharpe 1.54
+    Push further: top 2.
     """
     if len(prices) < 252:
         return {}
@@ -42,7 +43,7 @@ def strategy(prices, current_date):
     if len(eligible) == 0:
         return {}
 
-    top_n = min(3, len(eligible))
+    top_n = min(2, len(eligible))
     top_assets = eligible.nlargest(top_n).index.tolist()
 
     inv_vol = 1.0 / vol_20d[top_assets].replace(0, np.nan).dropna()
