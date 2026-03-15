@@ -9,16 +9,24 @@ import pandas as pd
 REBALANCE_FREQ = "weekly"
 LOOKBACK = 252
 
+# Asset class definitions matching trade.xyz categories
+ASSET_CLASSES = {
+    "equity": ["SPY", "QQQ", "IWM", "DIA", "XLK", "XLF", "XLE", "XLV",
+               "XLI", "XLP", "XLU", "XLB", "XLRE", "EEM", "EFA", "VWO"],
+    "precious_metals": ["GLD", "SLV", "PPLT", "PALL"],
+    "energy_commodities": ["USO", "UNG", "CPER"],
+    "bonds": ["TLT", "IEF", "HYG", "LQD"],
+    "crypto": ["BTC-USD", "ETH-USD", "SOL-USD"],
+}
+
 def strategy(prices, current_date):
     """
-    CA-1: Volatility-adjusted momentum, top 2, equal weight.
+    CA-3: Cross-asset class rotation.
 
-    Problem: Pure momentum picks crypto in bull runs (high raw return)
-    but crypto's 50%+ annual vol makes it a poor risk-adjusted pick.
+    Pick the best risk-adjusted momentum asset from EACH asset class,
+    then allocate across asset classes by their best asset's signal strength.
 
-    Fix: Use risk-adjusted momentum = return / volatility (basically Sharpe).
-    This naturally penalizes high-vol assets and levels the playing field
-    between crypto (50%+ vol) and equities (15-20% vol).
+    This ensures diversification: always hold at least 2 different asset classes.
     """
     if len(prices) < 252:
         return {}
@@ -27,30 +35,31 @@ def strategy(prices, current_date):
     if len(returns) < 200:
         return {}
 
-    # 12-1 month momentum
     mom_12m = prices.iloc[-252:-21].pct_change(
         periods=len(prices.iloc[-252:-21]) - 1
     ).iloc[-1]
-
-    # 60-day realized volatility (annualized)
     vol_60d = returns.iloc[-60:].std() * np.sqrt(252)
+    risk_adj_mom = (mom_12m / vol_60d.replace(0, np.nan)).dropna()
 
-    # Risk-adjusted momentum = momentum / volatility
-    risk_adj_mom = mom_12m / vol_60d.replace(0, np.nan)
-    risk_adj_mom = risk_adj_mom.dropna()
+    # Find best asset from each class
+    class_picks = {}
+    for cls, symbols in ASSET_CLASSES.items():
+        available = [s for s in symbols if s in risk_adj_mom.index]
+        if not available:
+            continue
+        scores = risk_adj_mom[available]
+        best = scores.idxmax()
+        class_picks[cls] = (best, scores[best])
 
-    if len(risk_adj_mom) == 0:
+    if len(class_picks) == 0:
         return {}
 
-    def zscore(s):
-        s = s.dropna()
-        if s.std() == 0:
-            return s * 0
-        return (s - s.mean()) / s.std()
+    # Pick top 2 asset classes by their best asset's risk-adj momentum
+    sorted_classes = sorted(class_picks.items(), key=lambda x: x[1][1], reverse=True)
+    top_2 = sorted_classes[:2]
 
-    signal = zscore(risk_adj_mom).dropna()
-    if len(signal) == 0:
-        return {}
+    weights = {}
+    for cls, (sym, score) in top_2:
+        weights[sym] = 0.475
 
-    top_assets = signal.nlargest(2).index.tolist()
-    return {sym: 0.475 for sym in top_assets}
+    return weights
