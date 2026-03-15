@@ -11,11 +11,10 @@ LOOKBACK = 252
 
 def strategy(prices, current_date):
     """
-    Experiment 14: Pure 12-1m momentum, top 2, no vol filter.
+    Experiment 15: Pure momentum, top 2, equal weight.
 
-    Exp11 showed pure mom was worse WITH vol filter.
-    But exp12→13 showed removing vol filter + higher mom weight helps.
-    Test: does 100% momentum beat 90/10?
+    Exp14 uses inv-vol weighting. With only 2 assets, equal weight
+    might be simpler and equally effective.
     """
     if len(prices) < 252:
         return {}
@@ -38,11 +37,5 @@ def strategy(prices, current_date):
 
     top_assets = signal.nlargest(2).index.tolist()
 
-    vol_20d = returns.iloc[-20:].std() * np.sqrt(252)
-    inv_vol = 1.0 / vol_20d[top_assets].replace(0, np.nan).dropna()
-    if len(inv_vol) == 0:
-        return {}
-    weights = inv_vol / inv_vol.sum()
-    weights = weights * 0.95
-
-    return {sym: float(w) for sym, w in weights.items() if w > 0.01}
+    # Equal weight: 47.5% each
+    return {sym: 0.475 for sym in top_assets}
