@@ -1,0 +1,17 @@
+Running train period backtest...
+Running test period backtest...
+
+---
+train_sharpe:     0.1217
+train_cagr:       6.26%
+train_max_dd:     -28.23%
+train_vol:        18.53%
+train_sortino:    0.1388
+test_sharpe:      1.9265
+test_cagr:        33.02%
+test_max_dd:      -10.29%
+test_vol:         15.06%
+test_sortino:     1.6480
+overfit_score:    0.0000
+num_trades:       115
+total_seconds:    0.9

@@ -1,0 +1,17 @@
+commit	test_sharpe	overfit_score	status	description
+50212ac	0.8927	0.0000	keep	baseline: 70/30 mom/MR, inv-vol, top 5, vol filter 85%, 90% invested
+8246dda	0.3259	0.0000	discard	trend filter + abs momentum too restrictive
+fe2abe7	0.4487	0.0000	discard	monthly rebal, 6m mom, 50/50 blend, top 7
+968a298	0.4962	0.0000	discard	vol targeting 10% reduced returns
+463c226	0.8792	0.0000	discard	multi-TF momentum nearly matched but didn't beat baseline
+a697c41	0.4333	0.0000	discard	regime-aware dual-sleeve too conservative in bull market
+0886a26	1.0952	0.0000	keep	80/20 blend, top 4, 95% — concentration helps
+a880026	1.5368	0.0000	keep	top 3 — more concentration = better
+aa0a872	1.6836	0.0000	keep	top 2 — even more concentration
+ec05491	2.2548	0.0000	discard	top 1 — fragile (train sharpe -0.32)
+67cc1d4	1.3891	0.0000	discard	top 2 + multi-TF worse than single-TF
+6698141	1.3172	0.0000	discard	pure mom WITH vol filter — MR still needed with filter
+5568807	1.6924	0.0000	keep	top 2 no vol filter — train sharpe turns positive
+6e214d7	1.8504	0.0000	keep	90/10 mom/MR — higher mom weight helps without filter
+964cfd8	1.8908	0.0000	keep	100% momentum — MR not needed without vol filter
+626a643	1.9265	0.0000	keep	BEST: pure momentum, top 2, EQUAL WEIGHT, no vol filter
