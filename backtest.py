@@ -32,18 +32,30 @@ CACHE_DIR = os.path.join(os.path.dirname(__file__), ".cache")
 DATA_DIR = os.path.join(CACHE_DIR, "data")
 RESULTS_FILE = os.path.join(os.path.dirname(__file__), "results.tsv")
 
-# Universe: liquid US large-cap ETFs + sector ETFs
+# Universe: US ETFs + Crypto + Commodities
+# Mirrors trade.xyz cross-asset coverage: equities, crypto, precious metals, commodities
 UNIVERSE = [
-    "SPY", "QQQ", "IWM", "DIA",        # broad market
-    "XLK", "XLF", "XLE", "XLV", "XLI",  # sectors
-    "XLP", "XLU", "XLB", "XLRE",        # sectors cont.
-    "GLD", "SLV", "TLT", "IEF",         # commodities & bonds
-    "EEM", "EFA", "VWO",                 # international
-    "HYG", "LQD",                        # credit
+    # Broad market equities
+    "SPY", "QQQ", "IWM", "DIA",
+    # Sector ETFs
+    "XLK", "XLF", "XLE", "XLV", "XLI",
+    "XLP", "XLU", "XLB", "XLRE",
+    # Precious metals & commodities (trade.xyz: Gold, Silver, Platinum, Palladium, Oil)
+    "GLD", "SLV", "PPLT", "PALL",       # precious metals
+    "USO", "UNG",                        # energy commodities (WTI oil, nat gas)
+    "CPER",                              # copper
+    # Bonds
+    "TLT", "IEF",
+    # International
+    "EEM", "EFA", "VWO",
+    # Credit
+    "HYG", "LQD",
+    # Crypto (trade.xyz: BTC, ETH, SOL perps)
+    "BTC-USD", "ETH-USD", "SOL-USD",
 ]
 
 # Backtest parameters
-TRAIN_START = "2015-01-01"
+TRAIN_START = "2020-01-01"
 TRAIN_END = "2023-12-31"
 TEST_START = "2024-01-01"
 TEST_END = "2025-12-31"
