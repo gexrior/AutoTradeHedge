@@ -1,8 +1,6 @@
 """
-Trading Autoresearch — Strategy File
+Trading Autoresearch — Strategy File (Cross-Asset Edition)
 THIS IS THE ONLY FILE THE AGENT MODIFIES.
-
-Best strategy found through 15 evolutionary experiments.
 """
 
 import numpy as np
@@ -13,26 +11,14 @@ LOOKBACK = 252
 
 def strategy(prices, current_date):
     """
-    Evolved Strategy: Cross-Sectional Momentum, Top 2, Equal Weight.
+    CA-1: Volatility-adjusted momentum, top 2, equal weight.
 
-    After 15 experiments of evolutionary search, this emerged as the optimal
-    strategy on the 22-ETF universe:
+    Problem: Pure momentum picks crypto in bull runs (high raw return)
+    but crypto's 50%+ annual vol makes it a poor risk-adjusted pick.
 
-    1. Rank all assets by 12-1 month momentum (skip most recent month to
-       avoid short-term reversal noise)
-    2. Select the top 2 highest-momentum assets
-    3. Equal-weight at 47.5% each (5% cash buffer)
-    4. Rebalance weekly
-
-    Key discoveries from the evolutionary process:
-    - Concentration beats diversification: top 2 >> top 5 >> top 7
-    - Equal weight beats inverse-vol weight at high concentration
-    - Vol filter hurts when already concentrated (removes good candidates)
-    - MR signal helps with vol filter, but not needed without it
-    - Simpler is better: fewer parameters = more robust
-
-    Performance (out-of-sample 2024-2025):
-    - Sharpe: 1.93 | CAGR: 33% | MaxDD: -10.3% | Sortino: 1.65
+    Fix: Use risk-adjusted momentum = return / volatility (basically Sharpe).
+    This naturally penalizes high-vol assets and levels the playing field
+    between crypto (50%+ vol) and equities (15-20% vol).
     """
     if len(prices) < 252:
         return {}
@@ -41,10 +27,20 @@ def strategy(prices, current_date):
     if len(returns) < 200:
         return {}
 
-    # 12-1 month momentum: skip last 21 trading days
+    # 12-1 month momentum
     mom_12m = prices.iloc[-252:-21].pct_change(
         periods=len(prices.iloc[-252:-21]) - 1
     ).iloc[-1]
+
+    # 60-day realized volatility (annualized)
+    vol_60d = returns.iloc[-60:].std() * np.sqrt(252)
+
+    # Risk-adjusted momentum = momentum / volatility
+    risk_adj_mom = mom_12m / vol_60d.replace(0, np.nan)
+    risk_adj_mom = risk_adj_mom.dropna()
+
+    if len(risk_adj_mom) == 0:
+        return {}
 
     def zscore(s):
         s = s.dropna()
@@ -52,10 +48,9 @@ def strategy(prices, current_date):
             return s * 0
         return (s - s.mean()) / s.std()
 
-    signal = zscore(mom_12m).dropna()
+    signal = zscore(risk_adj_mom).dropna()
     if len(signal) == 0:
         return {}
 
-    # Top 2 assets by momentum, equal weight
     top_assets = signal.nlargest(2).index.tolist()
     return {sym: 0.475 for sym in top_assets}
