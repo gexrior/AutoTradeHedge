@@ -11,11 +11,11 @@ LOOKBACK = 252
 
 def strategy(prices, current_date):
     """
-    Experiment 8: Extreme concentration — top 2 assets.
+    Experiment 12: Top 2 without vol filter.
 
-    Exp6: top 4 → sharpe 1.10
-    Exp7: top 3 → sharpe 1.54
-    Push further: top 2.
+    Exp8 has a vol filter at 85th percentile that excludes ~3 assets.
+    With only 2 positions, inv-vol weighting already handles risk.
+    Removing the filter gives the signal more candidates to pick from.
     """
     if len(prices) < 252:
         return {}
@@ -35,10 +35,7 @@ def strategy(prices, current_date):
         return (s - s.mean()) / s.std()
 
     combined = 0.8 * zscore(mom_12m) + 0.2 * zscore(mr_signal)
-
-    vol_20d = returns.iloc[-20:].std() * np.sqrt(252)
-    vol_threshold = vol_20d.quantile(0.85)
-    eligible = combined[vol_20d < vol_threshold].dropna()
+    eligible = combined.dropna()
 
     if len(eligible) == 0:
         return {}
@@ -46,6 +43,7 @@ def strategy(prices, current_date):
     top_n = min(2, len(eligible))
     top_assets = eligible.nlargest(top_n).index.tolist()
 
+    vol_20d = returns.iloc[-20:].std() * np.sqrt(252)
     inv_vol = 1.0 / vol_20d[top_assets].replace(0, np.nan).dropna()
     if len(inv_vol) == 0:
         return {}
