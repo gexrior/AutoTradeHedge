@@ -9,7 +9,6 @@ import pandas as pd
 REBALANCE_FREQ = "weekly"
 LOOKBACK = 252
 
-# Asset class definitions matching trade.xyz categories
 ASSET_CLASSES = {
     "equity": ["SPY", "QQQ", "IWM", "DIA", "XLK", "XLF", "XLE", "XLV",
                "XLI", "XLP", "XLU", "XLB", "XLRE", "EEM", "EFA", "VWO"],
@@ -21,12 +20,10 @@ ASSET_CLASSES = {
 
 def strategy(prices, current_date):
     """
-    CA-3: Cross-asset class rotation.
+    CA-5: Cross-asset class rotation with signal-strength weighting.
 
-    Pick the best risk-adjusted momentum asset from EACH asset class,
-    then allocate across asset classes by their best asset's signal strength.
-
-    This ensures diversification: always hold at least 2 different asset classes.
+    Instead of equal-weighting the top 2 classes, weight proportional
+    to their risk-adjusted momentum score. Stronger signal gets more weight.
     """
     if len(prices) < 252:
         return {}
@@ -41,7 +38,6 @@ def strategy(prices, current_date):
     vol_60d = returns.iloc[-60:].std() * np.sqrt(252)
     risk_adj_mom = (mom_12m / vol_60d.replace(0, np.nan)).dropna()
 
-    # Find best asset from each class
     class_picks = {}
     for cls, symbols in ASSET_CLASSES.items():
         available = [s for s in symbols if s in risk_adj_mom.index]
@@ -54,12 +50,15 @@ def strategy(prices, current_date):
     if len(class_picks) == 0:
         return {}
 
-    # Pick top 2 asset classes by their best asset's risk-adj momentum
     sorted_classes = sorted(class_picks.items(), key=lambda x: x[1][1], reverse=True)
     top_2 = sorted_classes[:2]
 
+    # Signal-strength weighting (only use positive scores)
+    scores = {sym: max(score, 0.01) for cls, (sym, score) in top_2}
+    total_score = sum(scores.values())
+
     weights = {}
-    for cls, (sym, score) in top_2:
-        weights[sym] = 0.475
+    for sym, score in scores.items():
+        weights[sym] = (score / total_score) * 0.95
 
     return weights
