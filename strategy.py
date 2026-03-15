@@ -11,9 +11,11 @@ LOOKBACK = 252
 
 def strategy(prices, current_date):
     """
-    Experiment 13: Top 2 no vol filter, 90/10 momentum/MR.
+    Experiment 14: Pure 12-1m momentum, top 2, no vol filter.
 
-    Exp12 (80/20) = 1.692. Try higher momentum weight.
+    Exp11 showed pure mom was worse WITH vol filter.
+    But exp12→13 showed removing vol filter + higher mom weight helps.
+    Test: does 100% momentum beat 90/10?
     """
     if len(prices) < 252:
         return {}
@@ -23,8 +25,6 @@ def strategy(prices, current_date):
         return {}
 
     mom_12m = prices.iloc[-252:-21].pct_change(periods=len(prices.iloc[-252:-21]) - 1).iloc[-1]
-    ret_5d = prices.iloc[-5:].pct_change(periods=4).iloc[-1]
-    mr_signal = -ret_5d
 
     def zscore(s):
         s = s.dropna()
@@ -32,13 +32,11 @@ def strategy(prices, current_date):
             return s * 0
         return (s - s.mean()) / s.std()
 
-    combined = 0.9 * zscore(mom_12m) + 0.1 * zscore(mr_signal)
-    eligible = combined.dropna()
-
-    if len(eligible) == 0:
+    signal = zscore(mom_12m).dropna()
+    if len(signal) == 0:
         return {}
 
-    top_assets = eligible.nlargest(2).index.tolist()
+    top_assets = signal.nlargest(2).index.tolist()
 
     vol_20d = returns.iloc[-20:].std() * np.sqrt(252)
     inv_vol = 1.0 / vol_20d[top_assets].replace(0, np.nan).dropna()
