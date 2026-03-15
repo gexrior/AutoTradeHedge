@@ -11,15 +11,10 @@ LOOKBACK = 252
 
 def strategy(prices, current_date):
     """
-    Experiment 6: Baseline parameter tuning.
+    Experiment 7: Even more concentrated — top 3 assets.
 
-    Observations from prior experiments:
-    - Baseline (70/30, top 5, 90%) = 0.8927 is hard to beat
-    - Multi-TF momentum (exp4) nearly matched at 0.879
-    - More restrictive filters always hurt (exp1, exp2, exp5)
-
-    Try: More concentrated (top 4), higher momentum weight (80/20),
-    more invested (95%), keep vol filter at 85th percentile.
+    Exp6 showed that concentration (top 4) + higher momentum weight (80/20)
+    + higher investment (95%) = big win. Push further: top 3.
     """
     if len(prices) < 252:
         return {}
@@ -28,10 +23,7 @@ def strategy(prices, current_date):
     if len(returns) < 200:
         return {}
 
-    # --- Signal 1: 12-1 Month Momentum ---
     mom_12m = prices.iloc[-252:-21].pct_change(periods=len(prices.iloc[-252:-21]) - 1).iloc[-1]
-
-    # --- Signal 2: Short-term mean reversion (5-day) ---
     ret_5d = prices.iloc[-5:].pct_change(periods=4).iloc[-1]
     mr_signal = -ret_5d
 
@@ -41,13 +33,8 @@ def strategy(prices, current_date):
             return s * 0
         return (s - s.mean()) / s.std()
 
-    mom_z = zscore(mom_12m)
-    mr_z = zscore(mr_signal)
+    combined = 0.8 * zscore(mom_12m) + 0.2 * zscore(mr_signal)
 
-    # Blend: 80% momentum, 20% MR (more conviction in momentum)
-    combined = 0.8 * mom_z + 0.2 * mr_z
-
-    # --- Risk filter ---
     vol_20d = returns.iloc[-20:].std() * np.sqrt(252)
     vol_threshold = vol_20d.quantile(0.85)
     eligible = combined[vol_20d < vol_threshold].dropna()
@@ -55,14 +42,13 @@ def strategy(prices, current_date):
     if len(eligible) == 0:
         return {}
 
-    # More concentrated: top 4
-    top_n = min(4, len(eligible))
+    top_n = min(3, len(eligible))
     top_assets = eligible.nlargest(top_n).index.tolist()
 
     inv_vol = 1.0 / vol_20d[top_assets].replace(0, np.nan).dropna()
     if len(inv_vol) == 0:
         return {}
     weights = inv_vol / inv_vol.sum()
-    weights = weights * 0.95  # 95% invested
+    weights = weights * 0.95
 
     return {sym: float(w) for sym, w in weights.items() if w > 0.01}
