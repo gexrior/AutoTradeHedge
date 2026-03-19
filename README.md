@@ -18,7 +18,7 @@ strategy.py     — Agent 修改的唯一文件，包含交易策略逻辑
 program.md      — Agent 的指令手册（人编辑）
 results.tsv     — 实验轨迹记录（自动生成）
 .cache/data/    — 缓存的市场数据（parquet 格式）
-HYPERLIQUID_WATCHLIST.md — Hyperliquid 高 OI 观察清单（机会发现入口）
+HYPERLIQUID_WATCHLIST.md — trade[XYZ] / Hyperliquid `xyz` dex 高 OI 观察清单（机会发现入口）
 ```
 
 ## Quick Start

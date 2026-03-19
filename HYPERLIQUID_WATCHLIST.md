@@ -1,58 +1,52 @@
-# Hyperliquid OI Watchlist
+# Hyperliquid / trade[XYZ] OI Watchlist
 
 Last refreshed: 2026-03-19 Asia/Shanghai
-Source: Hyperliquid public `info` API (`type=metaAndAssetCtxs`)
-Selection rule: sort listed assets by **USD notional open interest**, approximated as:
+Source: Hyperliquid public `info` API
+Method:
+- Enumerate builder perp dexes with `type=perpDexs`
+- Query the `xyz` dex with `type=metaAndAssetCtxs`, `dex=xyz`
+- Rank by estimated USD notional open interest: `openInterest × markPx`
 
-`oi_usd = openInterest × markPx`
+Important:
+- This watchlist is for the **trade[XYZ] / xyz dex** specifically.
+- It is not the same as the default Hyperliquid perp universe.
+- Earlier versions were wrong because they only looked at the default perp dex and/or ranked raw OI units instead of USD notional.
 
-Reason: raw `openInterest` from the API appears to be in contract/coin units, not USD notional. Ranking by raw OI can be misleading.
+## Top 20 by USD Notional OI (`dex=xyz`)
 
-Purpose: add a single-venue derivatives attention list for future opportunity discovery and signal research.
-
-## Top 20 by USD Notional OI
-
-| Rank | Symbol | Raw OI | Mark Price | OI (USD notional, approx.) | 24h Notional Volume | Funding |
+| Rank | Symbol | OI (USD notional) | Raw OI | Mark Price | 24h Notional Volume | Funding |
 |---|---:|---:|---:|---:|---:|---:|
-| 1 | BTC | 27,466.10206 | 71,231.0 | 1,956,437,915.84 | 2,917,665,517.30 | 0.0000022996 |
-| 2 | ETH | 581,376.2774 | 2,212.6 | 1,286,353,151.38 | 1,765,235,031.55 | 0.0000060317 |
-| 3 | HYPE | 20,268,276.98 | 41.526 | 841,660,469.87 | 606,123,057.57 | 0.0000125 |
-| 4 | SOL | 3,454,828.14 | 90.843 | 313,846,952.72 | 298,098,434.92 | -0.0000059953 |
-| 5 | XRP | 56,598,356.0 | 1.4736 | 83,403,337.40 | 59,220,505.42 | -0.0000021562 |
-| 6 | ASTER | 99,814,158.0 | 0.69582 | 69,452,687.42 | 24,679,114.61 | 0.0000125 |
-| 7 | ZEC | 269,687.38 | 252.58 | 68,117,638.44 | 94,601,532.98 | 0.0000125 |
-| 8 | PAXG | 10,679.556 | 4,840.3 | 51,692,254.91 | 12,233,772.60 | 0.0000125 |
-| 9 | FARTCOIN | 242,326,949.4 | 0.20441 | 49,534,051.73 | 68,191,833.01 | 0.0000089503 |
-| 10 | ZRO | 20,277,821.0 | 2.093 | 42,441,479.35 | 11,960,632.92 | -0.0000125439 |
-| 11 | AVAX | 4,095,361.62 | 9.6668 | 39,589,041.71 | 7,440,429.09 | 0.0000125 |
-| 12 | LIT | 32,944,948.0 | 1.1953 | 39,379,096.34 | 11,122,049.79 | -0.0000338047 |
-| 13 | TAO | 146,240.938 | 261.37 | 38,222,993.97 | 35,596,590.71 | -0.0000313662 |
-| 14 | XPL | 302,874,436.0 | 0.10826 | 32,789,186.44 | 8,599,175.25 | 0.0000125 |
-| 15 | PUMP | 16,430,316,096.0 | 0.00197 | 32,367,722.71 | 11,188,228.14 | 0.0000125 |
-| 16 | XMR | 87,655.902 | 348.96 | 30,588,403.56 | 6,793,337.57 | 0.0000125 |
-| 17 | MON | 1,260,167,854.0 | 0.023218 | 29,258,577.23 | 2,208,819.96 | -0.0000448251 |
-| 18 | SUI | 25,987,236.8 | 0.98819 | 25,680,327.53 | 21,057,310.81 | 0.0000072794 |
-| 19 | LINK | 2,693,907.0 | 9.2585 | 24,941,537.96 | 14,218,910.04 | 0.0000125 |
-| 20 | BNB | 38,168.258 | 652.21 | 24,893,719.55 | 10,254,248.73 | 0.0000121991 |
+| 1 | xyz:CL | 308,304,401.65 | 3,198,742.534 | 96.383 | 899,794,849.02 | -0.000010235 |
+| 2 | xyz:XYZ100 | 212,461,354.65 | 8,710.2884 | 24,392.0 | 299,742,684.72 | -0.0000189426 |
+| 3 | xyz:BRENTOIL | 178,374,167.85 | 1,669,232.34 | 106.86 | 313,701,419.52 | 0.0000792408 |
+| 4 | xyz:GOLD | 139,881,693.99 | 28,838.0188 | 4,850.6 | 89,459,932.80 | 0.00000625 |
+| 5 | xyz:SILVER | 105,142,050.72 | 1,388,728.86 | 75.711 | 310,024,042.89 | 0.00000625 |
+| 6 | xyz:NVDA | 63,918,273.11 | 354,471.346 | 180.32 | 19,381,953.16 | 0.00000625 |
+| 7 | xyz:SNDK | 49,843,237.69 | 67,568.476 | 737.67 | 12,308,262.71 | -0.0000272238 |
+| 8 | xyz:MU | 33,053,577.47 | 73,742.448 | 448.23 | 23,641,098.77 | 0.0000274204 |
+| 9 | xyz:CRCL | 27,527,640.15 | 205,506.832 | 133.95 | 24,975,616.72 | 0.00000625 |
+| 10 | xyz:EWY | 21,926,068.13 | 163,969.998 | 133.72 | 18,031,092.91 | -0.0000307205 |
+| 11 | xyz:COPPER | 21,269,503.27 | 3,855,685.46 | 5.5164 | 17,461,260.89 | 0.00000625 |
+| 12 | xyz:SP500 | 20,764,824.73 | 3,138.15 | 6,616.9 | 33,918,544.11 | -0.000032096 |
+| 13 | xyz:GOOGL | 20,521,896.68 | 66,796.526 | 307.23 | 5,049,512.91 | 0.00000625 |
+| 14 | xyz:TSLA | 16,643,968.42 | 42,339.214 | 393.11 | 9,809,685.99 | -0.0000061998 |
+| 15 | xyz:SKHX | 14,315,102.37 | 21,083.246 | 678.98 | 5,834,907.33 | 0.0002313706 |
+| 16 | xyz:NATGAS | 13,686,262.92 | 4,347,053.4 | 3.1484 | 32,831,202.43 | 0.00000625 |
+| 17 | xyz:MSTR | 6,981,971.29 | 49,839.184 | 140.09 | 8,591,090.80 | 0.0000314701 |
+| 18 | xyz:EUR | 6,980,768.90 | 6,085,049.6 | 1.1472 | 9,455,829.01 | 0.0 |
+| 19 | xyz:JPY | 6,906,227.73 | 43,242.3 | 159.71 | 8,403,399.28 | 0.0000020649 |
+| 20 | xyz:HOOD | 6,405,600.51 | 85,340.872 | 75.059 | 19,631,880.26 | 0.00000625 |
 
-## Quick Notes
+## Notes
 
-- This corrected list now matches the structure of the Hyperliquid UI much better: large-cap majors rise to the top once OI is converted to USD notional.
-- The most important names at the venue level right now are: **BTC, ETH, HYPE, SOL**.
-- HYPE is notable because it ranks **#3 by estimated USD OI**, behind only BTC and ETH.
-- OI alone is still not enough. Next ranking pass should combine:
-  - OI level
+- The venue leaders are currently concentrated in:
+  - energy (`CL`, `BRENTOIL`, `NATGAS`)
+  - indices (`XYZ100`, `SP500`)
+  - precious metals (`GOLD`, `SILVER`)
+  - selected U.S. equities (`NVDA`, `TSLA`, `MSTR`, `HOOD`, etc.)
+- For future research, this list should be paired with:
   - OI change
   - price change
   - volume / OI ratio
-  - funding / basis
-  - event or listing catalyst
-
-## Research Rule
-
-Treat this as a **watchlist**, not a trade list.
-Before using any symbol in strategy code, confirm:
-- symbol mapping
-- historical price data source
-- historical OI / funding availability
-- whether the asset is mature enough to avoid one-off noise
+  - funding
+  - catalyst / calendar context
