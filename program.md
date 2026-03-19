@@ -95,7 +95,7 @@ LOOP FOREVER:
 ## Hyperliquid Observation List
 
 Use `HYPERLIQUID_WATCHLIST.md` as the venue-specific research watchlist.
-Current contents: top 20 Hyperliquid assets ranked by reported open interest from the public API.
+Current contents: top 20 Hyperliquid assets ranked by estimated USD notional open interest from the public API (`openInterest × markPx`).
 
 Rules:
 - Treat it as an **idea funnel**, not a portfolio universe.
