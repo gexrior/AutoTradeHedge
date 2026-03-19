@@ -49,10 +49,3 @@ python backtest.py --run
 ## 投资标的
 
 22 只高流动性美股 ETF：SPY, QQQ, IWM, DIA, XLK, XLF, XLE, XLV, XLI, XLP, XLU, XLB, XLRE, GLD, SLV, TLT, IEF, EEM, EFA, VWO, HYG, LQD
-
-## 卸载
-
-不需要时直接删除整个文件夹即可：
-```bash
-rm -rf ~/.claude/trading-autoresearch
-```
