@@ -92,6 +92,17 @@ LOOP FOREVER:
 9. 如果 `score = test_sharpe - 0.5 * overfit_score` 有改善，保留 commit
 10. 如果更差，git reset 回上一个 keep 状态
 
+## Hyperliquid Observation List
+
+Use `HYPERLIQUID_WATCHLIST.md` as the venue-specific research watchlist.
+Current contents: top 20 Hyperliquid assets ranked by reported open interest from the public API.
+
+Rules:
+- Treat it as an **idea funnel**, not a portfolio universe.
+- Do not add names to strategy/backtest code until historical data and symbol mapping are confirmed.
+- When doing discretionary opportunity discovery, prioritize names that combine high OI with rising volume, positive price response, and a clear catalyst.
+- Refresh the list periodically; OI leadership can change fast.
+
 ## Strategy Ideas to Explore
 
 按优先级排列的策略方向（从简单到复杂）：
